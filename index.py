@@ -33,29 +33,5 @@ async def on_message(message):
         embed.set_thumbnail(url=message.author.avatar_url)
         await message.channel.send(message.channel, embed=embed)
 
-@client.event
-async def on_message(message):
-    if message.content.startswith("connect"):
-        await message.author.voice.channel.connect()
-        await message.channel.send("보이스 채널에 입장합니다.")
-
-    if message.content.startswith("play"):
-        for vc in client.voice_clients:
-            if vc.guild == message.guild:
-                voice = vc
-
-            url = message.content.split(" ")[1]
-            option = {
-                'outtmpl' : "file/" + url.split('=')[1] + ".mp3"
-            }
-
-            with youtube_dl.YoutubeDL(option) as ydl:
-                ydl.download(url)
-                info = ydl.extract_info(url, download=False)
-                title = info["title"]
-
-            voice.play(discord.FFmpegAudio("file/" + url.split('=')[1] + ".mp3"))
-            await message.channel.send(title + "을 재생합니다.")
-
 access_token = os.environ["BOT_TOKEN"]
 client.run(access_token)
