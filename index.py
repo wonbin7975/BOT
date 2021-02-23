@@ -56,4 +56,5 @@ async def on_message(message):
             voice.play(discord.FFmpegAudio("file/" + url.split('=')[1] + ".mp3"))
             await message.channel.send(title + "을 재생합니다.")
 
-client.run("")
+access_token = os.environ["BOT_TOKEN"]
+client.run(access_token)
