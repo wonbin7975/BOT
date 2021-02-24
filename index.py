@@ -33,5 +33,11 @@ async def on_message(message):
         embed.set_thumbnail(url=message.author.avatar_url)
         await message.channel.send(message.channel, embed=embed)
 
+    if message.content.startswith("청소"):
+        number = int(message.content.split(" ")[1])
+        await message.delete()
+        await message.channel.purge(limit=number)
+        await message.channel.send(f"{number}개의 메세지를 삭제하였습니다")
+        
 access_token = os.environ["BOT_TOKEN"]
 client.run(access_token)
