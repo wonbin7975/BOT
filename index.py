@@ -10,7 +10,7 @@ client = discord.Client()
 async def on_ready():
     print(client.user.id)
     print("ready")
-    game = discord.Game("test bot")
+    game = discord.Game("남하세 코인")
     await client.change_presence(status=discord.Status.online, activity=game)
 
 
