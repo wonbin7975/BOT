@@ -1,4 +1,5 @@
 import discord
+from discord.ext import commands
 import datetime
 import youtube_dl
 import os
@@ -14,7 +15,67 @@ async def on_ready():
     await client.change_presence(status=discord.Status.online, activity=game)
 
 
+client = commands.Bot(command_prefix="!")
 
+@client.command()
+async def play(ctx, url :str):
+    song_there = os.path.isfile("song.mp3")
+    try:
+        if song_there:
+            os.remove("song.mp3")
+    except PermissionError:
+        await ctx.send("현재 재생 중인 음악이 끝날 때까지 기다리거나 'stop'을 입력합니다.")
+        return
+
+    voiceChannel = discord.utils.get(ctx.guild.voice_channels, name='General')
+    await voiceChannel.connect()
+    voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
+
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'postprocessors':[{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality':'192',
+        }]
+    }
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl :
+        ydl.download([url])
+    for file in os.listdir("./"):
+        if file.endswith(".mp3"):
+            os.rename(file, "song.mp3")
+    voice.play(discord.FFmpegPCMAudio("song.mp3"))
+
+
+@client.command()
+async def leave(ctx):
+    voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
+    if voice.is_connected():
+        await voice.disconnect()
+    else:
+        await ctx.send("봇이 음성채널에 연결되어있지 않습니다.")
+
+
+@client.command()
+async def pause(ctx):
+    voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
+    if voice.is_playing():
+        voice.pause()
+    else:
+        await ctx.send("오디오가 일시정지 되었습니다.")
+        
+@client.command()
+async def resume(ctx):
+    voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
+    if voice.is_paused():
+        voice.resume()
+    else:
+        await ctx.send("오디오가 재생되었습니다")
+
+@client.command()
+async def stop(ctx):
+    voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
+    voice.stop()
 
 @client.event
 async def on_message(message):
